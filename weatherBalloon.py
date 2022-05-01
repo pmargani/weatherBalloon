@@ -295,7 +295,12 @@ def plotEnvCsv(filename):
         k = keys[i]
         t = "%s %s" % (k, units[i])
         # TBF: handle NaNs
-        data = [float(row[i]) for row in rows]
+        try:
+            data = [float(row[i]) for row in rows]
+        except:
+            print("Could not convert to float data for key: ", k)
+            print(data)
+            continue
         #print(k, data)
 
         #plt.plot_date(mdts, data)
@@ -407,6 +412,10 @@ def getAnnotatedVideo(configFile=None):
     config.read(configFile)
     print(config)
 
+    # are we using all the sensors?
+    use_bme = conifg['SENSORS'].getboolean('use_bme')
+    use_gps = conifg['SENSORS'].getboolean('use_gps')
+
     # here's where our video goes
     # how to convert: ffmpeg -r 30 -i video.h264 video.mp4
     frmt = "%Y_%m_%d_%H_%M_%S"
@@ -442,8 +451,9 @@ def getAnnotatedVideo(configFile=None):
     # setup env sensor
     port = 1
     address = 0x77 # Adafruit BME280 address. Other BME280s may be different
-    bus = smbus2.SMBus(port)
-    bme280.load_calibration_params(bus,address)
+    if use_bme:
+        bus = smbus2.SMBus(port)
+        bme280.load_calibration_params(bus,address)
 
     # set up camera
     c = PiCamera()
@@ -497,8 +507,11 @@ def getAnnotatedVideo(configFile=None):
             # time to get data!
 
             # GPS data
-            lat, lng = tryToGetLatLong()
-            
+            if use_gps:
+                lat, lng = tryToGetLatLong()
+            else:
+                lat, lng = None, None
+
             # get sensor data from sense hat in dict form
             env = getEnv(sense)
 
@@ -507,7 +520,10 @@ def getAnnotatedVideo(configFile=None):
             env['lng'] = lng
 
             # add BME280 sensor data
-            humidity, pressure, temperature = getBMEData(bus,address)
+            if use_bme:
+                humidity, pressure, temperature = getBMEData(bus,address)
+            else:    
+                humidity, pressure, temperature = None, None, None
             env['bme_humidity'] = humidity
             env['bme_pressure'] = pressure
             env['bme_temperature'] = temperature
@@ -555,6 +571,8 @@ def getAnnotatedVideo(configFile=None):
 def waitForUserStart():
     "Wait for user to initialize starting of data, using joystick"
 
+    print("Waiting for user to start weather balloon software")
+
     # wait till the joystick is pressed down and released
     sense = SenseHat()
     sense.show_letter('?')
@@ -587,11 +605,15 @@ def runWeatherBalloon():
         print("user did not choose to start.  exiting")    
 
 def main():
-    #runWeatherBalloon()
-    #getAnnotatedVideo()
-    fn = "env.2022_04_26_20_07_33.csv"
-    plotEnvCsv(fn)
+    import sys
+    if len(sys.argv) > 1:
+        fn = sys.argv[1]
+        plotEnvCsv(fn)
+    else:
+        print ("running weather balloon")
+        runWeatherBalloon()
     #tryToGetLatLong()
+    #fn = "env.2022_04_27_01_17_17.csv"
 
 if __name__ == '__main__':
     main()

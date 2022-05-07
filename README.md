@@ -19,15 +19,21 @@ TBF: include requirements.txt
 
    * source the virtualenv
    * adjust values in weatherBalloon.conf (including length of video, etc.)
-   * python weatherBalloon.py
+   * python weatherBalloon.py # for running data aquisition
+   * python weatherBalloon.py [path to csv file] # for plotting results
 
 ## Retrieving the Data
 
 The sensor values are recorded in a CSV file marked 'env.[timestamp].csv'.  These values can then be parsed by the plotEnvCsv function.
 
-TBF: enable the plotEnvCsv function from the command line.
 
-## Data Examples
+
+## Results
+
+### March 6 2020 Test Run
+
+Weather Balloon software was run for 10 minutes while taking a short drive.  All sensors and video seemed to work correctly.
 
 
 <img src="AllTempsF.png" alt="AllTempsF.png" width="500">
+

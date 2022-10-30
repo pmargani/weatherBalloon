@@ -3,7 +3,6 @@ A module for collecting data and video for a high altitude weather baloon projec
 """
 
 
-from datetime import datetime
 import csv
 import time
 import string
@@ -12,6 +11,8 @@ import io
 import os
 import pathlib
 import configparser
+import argparse
+from datetime import datetime
 
 try:
     # sense hat
@@ -369,12 +370,17 @@ def plotEnvCsv(filename):
 
 
 def plotLatLongMap(rows, keys):
+    """
+    Plot the Longitude vs. Latitude, both directly,
+    and overlayed on top of a map.
+    """
 
     #keys = ['lat', 'lng']
     i = keys.index('lat')
     k = keys[i]
     t = "%s %s" % (k, "(deg)")
 
+    # gather the data, ignoring bad data
     lats = [float(rows[j][i]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None and rows[j][i] != '0' and rows[j][i] != '0.0']
     i = keys.index('lng')
     lngs = [float(rows[j][i]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None and rows[j][i] != '0' and rows[j][i] != '0.0']
@@ -394,17 +400,14 @@ def plotLatLongMap(rows, keys):
     plt.xlabel("Longitude (deg)")
     plt.ylabel("Lattitude (deg)")
     plt.title('Lattitude vs Longitude')
-    
-    # ruh_m = plt.imread('map.png')
-    
-    #ax.imshow(ruh_m, zorder=0, extent = BBox, aspect= 'equal')
 
+    # plot this data directly
     plt.plot(lngs, lats)
 
     plt.savefig("LatVsLng.png")
     plt.show()
 
-    # now do it with a map
+    # now do it overlayed ontop of a map
     fig, ax = plt.subplots()
 
     # ax.scatter(lats, lngs)
@@ -415,6 +418,7 @@ def plotLatLongMap(rows, keys):
     plt.ylabel("Lattitude (deg)")
     plt.title('Lattitude vs Longitude')
     
+    # TBF: make the name of this file a parameter?
     ruh_m = plt.imread('map.png')
     
     ax.imshow(ruh_m, zorder=0, extent = BBox, aspect= 'equal')
@@ -675,15 +679,16 @@ def runWeatherBalloon():
         print("user did not choose to start.  exiting")    
 
 def main():
-    import sys
-    if len(sys.argv) > 1:
-        fn = sys.argv[1]
-        plotEnvCsv(fn)
+    parser = argparse.ArgumentParser(description='Module for acquiring or analyzing weather balloon data')
+    parser.add_argument('file', nargs='?', type=str, help="path to csv file for data analysis; do not provide if starting data acquisition")
+    args = parser.parse_args()
+
+    if args.file:    
+        plotEnvCsv(args.file)
     else:
         print ("running weather balloon")
         runWeatherBalloon()
-    #tryToGetLatLong()
-    #fn = "env.2022_04_27_01_17_17.csv"
+
 
 if __name__ == '__main__':
     main()

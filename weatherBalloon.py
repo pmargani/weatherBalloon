@@ -282,8 +282,11 @@ def plotEnvCsv(filename):
     with open(filename, 'r') as csvfile:
         r = csv.reader(csvfile)
         for row in r:
+            print(row)
             rows.append(row)
     print(rows)
+
+    plotLatLongMap(rows, KEYS)
             
     dts = [datetime.strptime(r[0], TIME_FRMT) for r in rows]
     mdts = matplotlib.dates.date2num(dts)
@@ -291,20 +294,30 @@ def plotEnvCsv(filename):
     # make individual plots of everything but the timestamps        
     keys = KEYS #['nowStr', 'temperature', 'humidity', 'pressure', 'pitch', 'roll', 'yaw']
     units = UNITS #['', '(C)', '', '', '(deg)', '(deg)', '(deg)']
+    ignoreZeroPlots = ['lat', 'lng', 'pressure', 'bme_pressure']
+    pryPlots = ['pitch', 'roll', 'yaw']
+    offset = 0.
     for i in range(1, len(keys)):
         k = keys[i]
         t = "%s %s" % (k, units[i])
-        # TBF: handle NaNs
+     
         try:
-            data = [float(row[i]) for row in rows]
+            if k in ignoreZeroPlots:
+                print("ignoring zeros for plot", k)    
+                dataDts = [(float(rows[j][i]), dts[j]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None and rows[j][i] != '0' and rows[j][i] != '0.0']
+            else:    
+                dataDts = [(float(rows[j][i]), dts[j]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None ]
         except:
-            print("Could not convert to float data for key: ", k)
-            print(data)
+            print("Error ploting ", k)
             continue
-        #print(k, data)
 
+        data = [d[0] for d in dataDts]
+        thisDts = [d[1] for d in dataDts]        
         #plt.plot_date(mdts, data)
-        plt.plot(dts, data)
+        if len(thisDts) != len(data):
+            plt.plot( data)
+        else:
+            plt.plot(thisDts, data)
         # plt.plot(data)
         # beautify the x-labels
         plt.gcf().autofmt_xdate()
@@ -353,6 +366,63 @@ def plotEnvCsv(filename):
 
     plotDataTogether(['bme_pressure', 'pressure'], colors, 'Pressures', 'Pressures.png', 'Pressures', rows)
     plotDataTogether(['bme_humidity', 'humidity'], colors, 'Humiditys', 'Humiditys.png', 'Humiditys', rows)
+
+
+def plotLatLongMap(rows, keys):
+
+    #keys = ['lat', 'lng']
+    i = keys.index('lat')
+    k = keys[i]
+    t = "%s %s" % (k, "(deg)")
+
+    lats = [float(rows[j][i]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None and rows[j][i] != '0' and rows[j][i] != '0.0']
+    i = keys.index('lng')
+    lngs = [float(rows[j][i]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None and rows[j][i] != '0' and rows[j][i] != '0.0']
+    
+    print("Lats range: ", min(lats), max(lats))
+    print("Lngs range: ", min(lngs), max(lngs))
+    #Lats range:  38.245827166666665 38.4273425
+    #Lngs range:  -79.8276415 -79.27054683333333
+    # BBox = Lngs, Lats
+    BBox = (-79.8276415, -79.27054683333333, 38.245827166666665,  38.4273425)
+    
+    # fig, ax = plt.subplots()
+    # # ax.scatter(lats, lngs)
+    # ax.set_xlim(BBox[2], BBox[3])
+    # ax.set_xlim(BBox[0], BBox[1])
+
+    plt.xlabel("Longitude (deg)")
+    plt.ylabel("Lattitude (deg)")
+    plt.title('Lattitude vs Longitude')
+    
+    # ruh_m = plt.imread('map.png')
+    
+    #ax.imshow(ruh_m, zorder=0, extent = BBox, aspect= 'equal')
+
+    plt.plot(lngs, lats)
+
+    plt.savefig("LatVsLng.png")
+    plt.show()
+
+    # now do it with a map
+    fig, ax = plt.subplots()
+
+    # ax.scatter(lats, lngs)
+    ax.set_ylim(BBox[2], BBox[3])
+    ax.set_xlim(BBox[0], BBox[1])
+
+    plt.xlabel("Longitude (deg)")
+    plt.ylabel("Lattitude (deg)")
+    plt.title('Lattitude vs Longitude')
+    
+    ruh_m = plt.imread('map.png')
+    
+    ax.imshow(ruh_m, zorder=0, extent = BBox, aspect= 'equal')
+
+    plt.plot(lngs, lats)
+
+    plt.savefig("LatVsLngMap.png")
+    plt.show()
 
 def plotDataTogether(keys, colors, title, fn, ylabel, rows):
     "Make a plot of a number of data using the same axis"
@@ -413,8 +483,8 @@ def getAnnotatedVideo(configFile=None):
     print(config)
 
     # are we using all the sensors?
-    use_bme = conifg['SENSORS'].getboolean('use_bme')
-    use_gps = conifg['SENSORS'].getboolean('use_gps')
+    use_bme = config['SENSORS'].getboolean('use_bme')
+    use_gps = config['SENSORS'].getboolean('use_gps')
 
     # here's where our video goes
     # how to convert: ffmpeg -r 30 -i video.h264 video.mp4
@@ -617,3 +687,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # hPa: 925 to 111
+    # -56 C

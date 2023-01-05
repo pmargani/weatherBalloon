@@ -42,6 +42,15 @@ Here's an informal wiring diagram:
 
 <img src="images/raspberryPiWiring.jpg" alt="raspberryPiWiring.jpg" width="500">
 
+## Assembly Instructions
+
+### Sense Hat
+
+Installing the Sense Hat and using it with Python is straight forward:
+
+   * https://www.raspberrypi.com/documentation/accessories/sense-hat.html
+   * https://pythonhosted.org/sense-hat/
+   
 ## Retrieving the Data
 
 The sensor values are recorded in a CSV file marked 'env.[timestamp].csv'.  These values can then be parsed by the plotEnvCsv function.  To see the types of output, see the Results section.

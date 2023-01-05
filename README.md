@@ -44,6 +44,12 @@ Here's an informal wiring diagram:
 
 ## Assembly Instructions
 
+### Installing the OS (Raspian)
+
+https://www.raspberrypi.com/software/
+
+We used the Raspberry Pi Imager on Mac to write the Raspberry Pi OS (32-bit) to our card.  Insert that into the Pi, boot up and follow some of the setup instructions and you'll be on your way.
+
 ### Sense Hat
 
 Installing the Sense Hat and using it with Python is straight forward:

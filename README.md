@@ -50,6 +50,18 @@ https://www.raspberrypi.com/software/
 
 We used the Raspberry Pi Imager on Mac to write the Raspberry Pi OS (32-bit) to our card.  Insert that into the Pi, boot up and follow some of the setup instructions and you'll be on your way.
 
+### Installing the necessary software
+
+This repository is written in Python 3, so to avoid problems, instead of following the general 
+instructions below, I used a Python 3 virtual environment, and installed the required packages via
+'pip install -r requirements'.
+
+More details below.
+
+### Camera
+
+   * https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/
+   
 ### Sense Hat
 
 Installing the Sense Hat and using it with Python is straight forward:
@@ -57,6 +69,19 @@ Installing the Sense Hat and using it with Python is straight forward:
    * https://www.raspberrypi.com/documentation/accessories/sense-hat.html
    * https://pythonhosted.org/sense-hat/
    
+However, I had problems with Python 3 not finding the RTIMU library.  Follow these instructions:
+
+   * https://github.com/astro-pi/python-sense-hat/issues/58#issuecomment-255783155
+   
+### BME 280 Sensor
+
+   * https://pypi.org/project/RPi.bme280/
+   * https://www.raspberrypi-spy.co.uk/2016/07/using-bme280-i2c-temperature-pressure-sensor-in-python/
+   
+### GPS Module
+
+   * https://sparklers-the-makers.github.io/blog/robotics/use-neo-6m-module-with-raspberry-pi/
+
 ## Retrieving the Data
 
 The sensor values are recorded in a CSV file marked 'env.[timestamp].csv'.  These values can then be parsed by the plotEnvCsv function.  To see the types of output, see the Results section.

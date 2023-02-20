@@ -196,8 +196,8 @@ def getEnv(sense):
     orientation = sense.get_orientation_degrees()
     print("p: {pitch}, r: {roll}, y: {yaw}".format(**orientation))
 
-    accel_only = sense.get_accelerometer()
-    print("p: {pitch}, r: {roll}, y: {yaw}".format(**accel_only))
+    accel_only = sense.get_accelerometer_raw()
+    print("x: {x}, y: {y}, z: {z}".format(**accel_only))
 
     # convert these all to the appropriate strings
     # temperature = frmt(temperature)

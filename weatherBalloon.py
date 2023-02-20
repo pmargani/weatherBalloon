@@ -52,7 +52,10 @@ KEYS = [
     'yaw', 
     'lat', 
     'lng',
-    'alt'
+    'alt',
+    'accel_x',
+    'accel_y',
+    'accel_z'
 ]
 
 UNITS = [
@@ -70,6 +73,9 @@ UNITS = [
     '(deg)',
     '(deg)',
     '(m)'
+    '(Gs)',
+    '(Gs)',
+    '(Gs)'
 ]
 
 def str2flt(s):
@@ -211,7 +217,10 @@ def getEnv(sense):
         'pressure': pressure,
         'pitch': orientation['pitch'],
         'roll': orientation['roll'],
-        'yaw': orientation['yaw']
+        'yaw': orientation['yaw'],
+        'accel_x': accel_only['x'],
+        'accel_y': accel_only['y'],
+        'accel_z': accel_only['z']
     }
     return env
 

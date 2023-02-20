@@ -51,7 +51,8 @@ KEYS = [
     'roll', 
     'yaw', 
     'lat', 
-    'lng'
+    'lng',
+    'alt'
 ]
 
 UNITS = [
@@ -67,7 +68,8 @@ UNITS = [
     '(deg)',
     '(deg)',
     '(deg)',
-    '(deg)'
+    '(deg)',
+    '(m)'
 ]
 
 def str2flt(s):
@@ -87,6 +89,30 @@ def frmt(s):
     if f is not None:
         v = "%5.2f" % f
     return v    
+
+def tryToGetGPSInfo(sio):
+    """
+    A more efficient way of getting not just
+    Lattitude and Longitude but also Altitude.
+    """
+    lat = lng = alt = None
+    numAttempts = 10
+    for i in range(numAttempts):
+        try:
+            newdata = sio.readline()
+        except UnicodeDecodeError:
+            print("got UnicdoeDecodeError in tryToGetGPSInfo")
+            continue
+            
+    if newdata[0:6] == "$GPGGA":
+        newmsg = pynmea2.parse(newdata)
+        lat = newmsg.latitude
+        lng = newmsg.longitude
+        alt = newmsg.altitude
+        print("Got GGA info: lat=%s, lng=%s, alt=%s" % (lat, lng, alt))
+        break
+        
+    return lat, lng, alt
 
 def tryToGetLatLong():
     """
@@ -351,7 +377,7 @@ def plotEnvCsv(filename):
     plt.show()
 
     # do it again for Ferenheit
-    # (0°C × 9/5) + 32 = F
+    #  0 c x 9/5 + 32 = F
     for j, k in enumerate(keys):
         i = KEYS.index(k)
         data = [(float(row[i])* (9./5)) + 32.0 for row in rows]
@@ -419,7 +445,12 @@ def plotLatLongMap(rows, keys):
     plt.title('Lattitude vs Longitude')
     
     # TBF: make the name of this file a parameter?
-    ruh_m = plt.imread('map.png')
+    mapFile = 'map.png'
+    if not os.path.isfile(mapFile):
+        print("ERROR: cannot find map file: %s" % mapFile)
+        return
+    
+    ruh_m = plt.imread(mapFile)
     
     ax.imshow(ruh_m, zorder=0, extent = BBox, aspect= 'equal')
 
@@ -529,6 +560,13 @@ def getAnnotatedVideo(configFile=None):
         bus = smbus2.SMBus(port)
         bme280.load_calibration_params(bus,address)
 
+    # setup gps
+    if use_gps:
+        print("connecting to serial port for GPS")
+        port="/dev/ttyAMA0"
+        ser = serial.Serial(port, baudrate=9600, timeout=0.5)
+        sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+        
     # set up camera
     c = PiCamera()
     
@@ -582,9 +620,9 @@ def getAnnotatedVideo(configFile=None):
 
             # GPS data
             if use_gps:
-                lat, lng = tryToGetLatLong()
+                lat, lng, alt = tryToGetGPSInfo(sio) #tryToGetLatLong()
             else:
-                lat, lng = None, None
+                lat, lng, alt = None, None
 
             # get sensor data from sense hat in dict form
             env = getEnv(sense)
@@ -592,6 +630,7 @@ def getAnnotatedVideo(configFile=None):
             # add GPS data to this dict
             env['lat'] = lat
             env['lng'] = lng
+            env['alt'] = alt
 
             # add BME280 sensor data
             if use_bme:

@@ -82,6 +82,28 @@ However, I had problems with Python 3 not finding the RTIMU library.  Follow the
 
    * https://sparklers-the-makers.github.io/blog/robotics/use-neo-6m-module-with-raspberry-pi/
 
+### Static IP Address
+
+Rather then having to plug in the monitor, keyboard, etc. into the Pi, it's easier to enable SSH in the Pi configuration, set a static IP address for you Pi, and then just ssh into the Pi from another computer.  Lots of ways to create the static IP address, I used the advice here:
+
+https://pimylifeup.com/raspberry-pi-static-ip-address/
+
+### VNC
+
+Getting into the Pi via ssh in a terminal is useful, but you don't get a desktop.  Again, lots of ways to do this, but I found VNC to be helpful:
+
+https://raspberrypi-guide.github.io/networking/connecting-via-VNC
+
+### Starting up weather balloon software on Pi startup
+
+Because we'll be launching the Pi with the balloon at a site possibly without being able to interface with the Pi (no wifi, no monitor, etc.), we want the weather balloon software to start up as soon as the Pi powers up.  Again, lots of ways to do this, but I used the rc.local file as described here:
+
+https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
+
+https://learn.sparkfun.com/tutorials/how-to-run-a-raspberry-pi-program-on-startup/all
+
+Note when we start up, we need to a) source the correct virtual environment b) collect any output in case we need to debug issues.  To do this, we are calling the runWeatherBalloon bash script.
+
 ## Retrieving the Data
 
 The sensor values are recorded in a CSV file marked 'env.[timestamp].csv'.  These values can then be parsed by the plotEnvCsv function.  To see the types of output, see the Results section.

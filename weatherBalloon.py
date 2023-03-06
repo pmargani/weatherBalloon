@@ -251,7 +251,7 @@ def getEnvStr(env):
 
 def writeEnv(env, filename):
     "Add the dict of data as a row in our CSV file"
-    print('writeEnv')
+    print('writeEnv to: ', filename)
     # translate dict to ordered list:
 
     row = [str(env[k]) for k in KEYS]
@@ -420,8 +420,8 @@ def plotLatLongMap(rows, keys):
     i = keys.index('lng')
     lngs = [float(rows[j][i]) for j in range(len(rows)) if rows[j][i] != 'None' and rows[j][i] is not None and rows[j][i] != '0' and rows[j][i] != '0.0']
     
-    print("Lats range: ", min(lats), max(lats))
-    print("Lngs range: ", min(lngs), max(lngs))
+    #print("Lats range: ", min(lats), max(lats))
+    #print("Lngs range: ", min(lngs), max(lngs))
     #Lats range:  38.245827166666665 38.4273425
     #Lngs range:  -79.8276415 -79.27054683333333
     # BBox = Lngs, Lats
@@ -532,13 +532,16 @@ def getAnnotatedVideo(configFile=None):
 
     # here's where our video goes
     # how to convert: ffmpeg -r 30 -i video.h264 video.mp4
+    d = pathlib.Path(__file__).parent.resolve()
     frmt = "%Y_%m_%d_%H_%M_%S"
     now = datetime.now()
     nowStr = now.strftime(frmt)
     videoFn = "video.%s.h264" % nowStr
+    videoFn = os.path.join(d, videoFn)
 
     # here's where our data goes
     csvFn = "env.%s.csv" % nowStr
+    csvFn = os.path.join(d, csvFn)
 
     # get files ready
     f = open(csvFn, 'w')

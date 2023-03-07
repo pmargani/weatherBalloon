@@ -110,13 +110,18 @@ def tryToGetGPSInfo(sio):
             print("got UnicdoeDecodeError in tryToGetGPSInfo")
             continue
             
-        if newdata[0:6] == "$GPGGA":
-            newmsg = pynmea2.parse(newdata)
-            lat = newmsg.latitude
-            lng = newmsg.longitude
-            alt = newmsg.altitude
-            print("Got GGA info: lat=%s, lng=%s, alt=%s" % (lat, lng, alt))
-            break
+        try:    
+            if newdata[0:6] == "$GPGGA":
+                newmsg = pynmea2.parse(newdata)
+                lat = newmsg.latitude
+                lng = newmsg.longitude
+                alt = newmsg.altitude
+                print("Got GGA info: lat=%s, lng=%s, alt=%s" % (lat, lng, alt))
+                break
+        except:
+            # could not parse message
+            print("Error parsing GGA data")
+            continue
         
     return lat, lng, alt
 
